@@ -80,6 +80,7 @@ def get_downbeats(signal):
 
     Examples
     --------
+    >>> signal_mono, fs = librosa.load("example_song.mp3", sr=None, mono=True)
     >>> get_downbeats(signal_mono)
     array([1.000e-02, 1.890e+00, 3.760e+00, 5.630e+00, 7.510e+00, 9.380e+00,
            1.126e+01, 1.313e+01, 1.501e+01, 1.688e+01, 1.876e+01, 2.064e+01,
@@ -124,7 +125,12 @@ def make_spectral_cube(signal_mono, downbeat_frames):
 
     Examples
     --------
+    >>> signal_mono, fs = librosa.load("example_song.mp3", sr=None, mono=True)
+    >>> downbeat_times = get_downbeats(signal_mono)
+    >>> downbeat_frames = librosa.time_to_samples(downbeat_times, sr=fs)
     >>> spectral_cube = make_spectral_cube(signal_mono, downbeat_frames)
+    >>> spectral_cube.shape
+    (1025, 162, 31)
     >>> spectral_cube[:2,:2,:2]
     array([[[ 18.08905602+0.00000000e+00j, -20.48682976+0.00000000e+00j],
             [-16.07670403+0.00000000e+00j, -44.98669434+0.00000000e+00j]],
@@ -155,7 +161,7 @@ def validate_template_sizes(spectral_cube, n_templates):
     n_templates = [99,99,10] is valid (though unadvised), while
     n_templates = [30,20,20] is invalid.
     
-    If any of the values for n_templates are invalid, than
+    If ANY of the values for n_templates are invalid, than
     get_recommended_template_sizes() is used to obtain
     replacement values for n_templates.
 
@@ -173,8 +179,12 @@ def validate_template_sizes(spectral_cube, n_templates):
 
     Examples
     --------
-    >>> validate_template_sizes(spectral_cube, n_templates)
+    >>> validate_template_sizes(np.zeros((1025, 162, 31)), [100, 50, 20])
+    array([100, 50, 20])
+    >>> validate_template_sizes(np.zeros((1025, 162, 31)), [0, 0, 0])
     array([63, 21,  7])
+    >>> validate_template_sizes(np.zeros((1025, 162, 31)), [100, 50, 40])
+    array([63, 21, 7])
     
     See Also
     --------
@@ -243,20 +253,25 @@ def create_loop_spectrum(sounds, rhythms, core_slice):
 
     Examples
     --------
+    >>> np.random.seed(0)
+    >>> factors = [np.abs(np.random.randn(1025, 63)),
+            np.abs(np.random.randn(162, 21)),
+            np.abs(np.random.randn(31, 7))]
+    >>> core = np.abs(np.random.randn(63,21,7))
     >>> create_loop_spectrum(factors[0], factors[1], core[:,:,0])
-    array([[2.18655152e+01, 2.33809279e+01, 1.41177489e+01, ...,
-            3.41226316e+00, 4.13603762e+00, 4.40903069e+00],
-           [2.19071941e+01, 1.72018802e+01, 9.34874138e+00, ...,
-            1.03270183e+01, 1.24937576e+01, 1.55722056e+01],
-           [2.41047662e+01, 2.29424785e+01, 2.85487624e+01, ...,
-            1.20072163e+01, 2.41067461e+01, 2.76246296e+01],
+    array([[727.4153606 , 728.64591236, 625.76726056, ..., 512.94167141,
+            592.2098947 , 607.10457107],
+           [782.11991843, 778.09690543, 682.71895323, ..., 550.43525375,
+            636.51448493, 666.35600624],
+           [733.96209316, 720.17586837, 621.80762807, ..., 501.51192504,
+            590.14018676, 605.44147057],
            ...,
-           [6.43656317e-02, 4.73108798e-02, 1.82280916e-02, ...,
-            3.22615535e-02, 1.46806524e-02, 1.14091573e-02],
-           [4.54570758e-02, 3.00483403e-02, 1.52157357e-02, ...,
-            3.03952309e-02, 1.39044458e-02, 1.07467596e-02],
-           [1.62624878e-01, 1.40923815e-01, 4.41798227e-02, ...,
-            2.62436762e-02, 1.22221164e-02, 1.24432306e-02]])
+           [772.43712078, 758.88473642, 654.35159419, ..., 522.69754588,
+            628.84580165, 641.66347072],
+           [677.58720601, 666.52484723, 583.92269705, ..., 471.24362278,
+            558.17441475, 573.31864635],
+           [768.96634561, 758.85553214, 639.21515256, ..., 525.83186141,
+            634.04799161, 644.35772338]])
     """
     loop_spectrum = np.dot(np.dot(sounds, core_slice), rhythms.transpose())
     return loop_spectrum
@@ -283,8 +298,12 @@ def choose_bar_to_reconstruct(loop_templates, ith_loop):
 
     Examples
     --------
+    >>> np.random.seed(0)
+    >>> factors = [np.abs(np.random.randn(1025, 63)),
+            np.abs(np.random.randn(162, 21)),
+            np.abs(np.random.randn(31, 7))]
     >>> choose_bar_to_reconstruct(factors[2], 0)
-    30
+    10
     """
     bar_ind = np.argmax(loop_templates[:,ith_loop])
     return bar_ind
@@ -310,11 +329,15 @@ def get_loop_signal(loop_spectrum, original_spectrum):
 
     Examples
     --------
-    >>> get_loop_signal(loop_spectrum, spectral_cube[:,:,30])
-    get_loop_signal(loop_spectrum, spectral_cube[:,:,30])
-    array([-0.08186008, -0.08577164, -0.06582578, ...,  0.00286376,
-            0.00289357,  0.00292362], dtype=float32)
-    
+    >>> np.random.seed(0)
+    >>> random_matrix = np.random.randn(1025,130)
+    >>> loop_spectrum = np.abs(random_matrix) / np.max(random_matrix)
+    >>> random_matrix_2 = np.random.randn(1025,130)
+    >>> loop_spectrum_2 = np.abs(random_matrix_2) / np.max(random_matrix_2)
+    >>> get_loop_signal(loop_spectrum, loop_spectrum_2)
+    array([-5.7243928e-04, -2.3625907e-04, -3.8087784e-04, ...,
+            9.2569360e-05,  3.9195133e-04, -2.4777438e-04], dtype=float32)
+        
     See also
     --------
     librosa.util.softmask

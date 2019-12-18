@@ -1,6 +1,6 @@
 # loopextractor
 
-A python scipt for extracting loops from audio files.
+A python script for extracting loops from audio files.
 
 The script uses non-negative tensor factorization to model a version of the spectrum.
 
@@ -25,7 +25,7 @@ loopextractor.run_algorithm("my_audio_file.mp3", n_templates=[30,25,10], output_
 
 The script implements the algorithm described in this paper:
 
-    Smith, Jordan B. L., and Goto, Masataka. 2018. "Nonnegative tensor factorization for source separation of loops in audio." *Proceedings of the IEEE International Conference on Acoustics, Speech and Signal Processing (IEEE ICASSP 2018).* Calgary, AB, Canada. pp. 171--175.
+> Smith, Jordan B. L., and Goto, Masataka. 2018. "Nonnegative tensor factorization for source separation of loops in audio." *Proceedings of the IEEE International Conference on Acoustics, Speech and Signal Processing (IEEE ICASSP 2018).* Calgary, AB, Canada. pp. 171--175.
 
 When using this code for an academic paper/project, please cite this paper as a reference.
 
