@@ -329,4 +329,4 @@ def get_loop_signal(loop_spectrum, original_spectrum):
 
 if __name__ == "__main__":
 	# Run algorithm on test song:
-	run_algorithm("loopextractor/audio/example_song.mp3", n_templates=[0,0,0], output_savename="extracted_loop")
+	run_algorithm("example_song.mp3", n_templates=[0,0,0], output_savename="extracted_loop")
