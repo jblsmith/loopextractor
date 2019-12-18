@@ -1,3 +1,7 @@
+Copyright (c) 2019 Jordan B. L. Smith (@jblsmith)
+
+You may use this software under LGPLv3, which is displayed below.
+
 # GNU Lesser General Public License
 
 *Version 3, 29 June 2007*

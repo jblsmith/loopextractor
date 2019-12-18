@@ -1,3 +1,12 @@
+'''
+    File name: loopextractor.py
+    Author: Jordan B. L. Smith
+    Date created: 2 December 2019
+    Date last modified: 18 December 2019
+    License: GNU Lesser General Public License v3 (LGPLv3)
+    Python Version: 3.7
+'''
+
 import librosa
 import madmom
 import numpy as np
@@ -320,4 +329,4 @@ def get_loop_signal(loop_spectrum, original_spectrum):
 
 if __name__ == "__main__":
 	# Run algorithm on test song:
-	run_algorithm("example_song.mp3", n_templates=[0,0,0], output_savename="extracted_loop")
+	run_algorithm("loopextractor/audio/example_song.mp3", n_templates=[0,0,0], output_savename="extracted_loop")
