@@ -23,11 +23,9 @@ loopextractor.run_algorithm("my_audio_file.mp3", n_templates=[30,25,10], output_
 
 ### Reference
 
-The script implements the algorithm described in this paper:
+The script implements the algorithm described in a paper I published in 2018, [described here](http://jblsmith.github.io/projects/nonnegative-tensor-factorization/). When using this code for an academic paper/project, please cite this paper as a reference:
 
-> Smith, Jordan B. L., and Goto, Masataka. 2018. "Nonnegative tensor factorization for source separation of loops in audio." *Proceedings of the IEEE International Conference on Acoustics, Speech and Signal Processing (IEEE ICASSP 2018).* Calgary, AB, Canada. pp. 171--175.
-
-When using this code for an academic paper/project, please cite this paper as a reference.
+> Smith, Jordan B. L., and Goto, Masataka. 2018. "Nonnegative tensor factorization for source separation of loops in audio." *Proceedings of the IEEE International Conference on Acoustics, Speech and Signal Processing (IEEE ICASSP 2018).* Calgary, AB, Canada. pp. 171--175. 
 
 The included example song was assembled using loops from [FreeSound.org](FreeSound.org) that were licensed Creative-Commons 0, i.e., committed to the public domain.
 
