@@ -7,12 +7,14 @@
     Python Version: 3.7
 '''
 
+import copy
 import librosa
 import madmom
 import numpy as np
 import os
 import tensorly
 import tensorly.decomposition as tld
+from sklearn.decomposition import NMF
 
 def run_algorithm(audio_file, n_templates=[0,0,0], output_savename="extracted_loop"):
     """Complete pipeline of algorithm.
@@ -200,6 +202,46 @@ def validate_template_sizes(spectral_cube, n_templates):
     else:
         return get_recommended_template_sizes(spectral_cube)
 
+def purify_core_tensor(core, factors, new_rank, dim_to_reduce=2):
+    """Reduce the size of the core tensor by modelling repeated content
+    across loop recipes. The output is a more "pure" set of loop
+    recipes that should be more distinct from each other.
+
+    Parameters
+    ----------
+    core : np.ndarray [shape=(n1,n2,n3)]
+        Core tensor to be compressed.
+    factors : list [shape=(3,), dtype=np.ndarray]
+        List of estimated templates
+    new_rank : int
+        The new size for the core tensor
+    dim_to_reduce : int
+        The dimension along which to compress the core tensor.
+        (Default value 2 will reduce the number of loop types.)
+
+    Returns
+    -------
+    new_core : np.ndarray [shape=(n1,n2,new_rank)]
+        Compressed version of the core tensor
+    new_factors : list [shape=(3,), dtype=np.ndarray]
+        New list of templates.
+        Note: two templates will be the same as before;
+            only the template for the compressed dimension
+            will be different.    
+    """
+    assert new_rank < core.shape[dim_to_reduce]
+    X = tensorly.unfold(core,dim_to_reduce)
+    model = NMF(n_components=new_rank, init='nndsvd', random_state=0)
+    W = model.fit_transform(X)
+    H = model.components_
+    # Re-construct core tensor and factors based on NMF factors from core tensor:
+    new_shape = list(core.shape)
+    new_shape[dim_to_reduce] = new_rank
+    new_core = tensorly.fold(H, dim_to_reduce, new_shape)
+    new_factors = copy.copy(factors)
+    new_factors[dim_to_reduce] = np.dot(factors[dim_to_reduce],W)
+    return new_core, new_factors
+
 def get_recommended_template_sizes(spectral_cube):
     """Propose reasonable values for numbers of templates
     to estimate.
@@ -351,5 +393,5 @@ def get_loop_signal(loop_spectrum, original_spectrum):
     return signal
 
 if __name__ == "__main__":
-	# Run algorithm on test song:
-	run_algorithm("example_song.mp3", n_templates=[0,0,0], output_savename="extracted_loop")
+    # Run algorithm on test song:
+    run_algorithm("example_song.mp3", n_templates=[0,0,0], output_savename="extracted_loop")
