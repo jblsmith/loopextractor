@@ -1,5 +1,5 @@
 librosa==0.7.1
 madmom==0.16.1
-numpy==1.17.4
+numpy==1.22.0
 tensorly==0.4.4
 scikit-learn
