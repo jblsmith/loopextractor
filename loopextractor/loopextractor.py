@@ -2,16 +2,17 @@
     File name: loopextractor.py
     Author: Jordan B. L. Smith
     Date created: 2 December 2019
-    Date last modified: 18 December 2019
+    Date last modified: 1 February 2024
     License: GNU Lesser General Public License v3 (LGPLv3)
-    Python Version: 3.7
+    Python Version: 3.8
 '''
 
+import argparse
 import copy
 import librosa
-import madmom
 import numpy as np
 import os
+import soundfile
 import tensorly
 import tensorly.decomposition as tld
 from sklearn.decomposition import NMF
@@ -47,7 +48,7 @@ def run_algorithm(audio_file, n_templates=[0,0,0], output_savename="extracted_lo
     # Load mono audio:
     signal_mono, fs = librosa.load(audio_file, sr=None, mono=True)
     # Use madmom to estimate the downbeat times:
-    downbeat_times = get_downbeats(signal_mono)
+    downbeat_times = get_downbeats(signal_mono, fs)
     # Convert times to frames so we segment signal:
     downbeat_frames = librosa.time_to_samples(downbeat_times, sr=fs)
     # Create spectral cube out of signal:
@@ -65,42 +66,18 @@ def run_algorithm(audio_file, n_templates=[0,0,0], output_savename="extracted_lo
         # Reconstruct loop signal by masking original spectrum:
         ith_loop_signal = get_loop_signal(loop_spectrum, spectral_cube[:,:,bar_ind])
         # Write signal to disk:
-        librosa.output.write_wav("{0}_{1}.wav".format(output_savename,ith_loop), ith_loop_signal, fs)
+        soundfile.write("{0}_{1}.wav".format(output_savename,ith_loop), ith_loop_signal, fs)
 
-def get_downbeats(signal):
-    """Use madmom package to estimate downbeats for an audio signal.
-
-    Parameters
-    ----------
-    signal : np.ndarray [shape=(n,), dtype=float]
-        Input mono audio signal.
-
-    Returns
-    -------
-    downbeat_times : np.ndarray [shape=(n,), dtype=float]
-        List of estimated downbeat times in seconds.
-
-    Examples
-    --------
-    >>> signal_mono, fs = librosa.load("example_song.mp3", sr=None, mono=True)
-    >>> get_downbeats(signal_mono)
-    array([1.000e-02, 1.890e+00, 3.760e+00, 5.630e+00, 7.510e+00, 9.380e+00,
-           1.126e+01, 1.313e+01, 1.501e+01, 1.688e+01, 1.876e+01, 2.064e+01,
-           2.251e+01, 2.439e+01, 2.626e+01, 2.814e+01, 3.002e+01, 3.189e+01,
-           3.376e+01, 3.564e+01, 3.751e+01, 3.939e+01, 4.126e+01, 4.314e+01,
-           4.501e+01, 4.689e+01, 4.876e+01, 5.063e+01, 5.251e+01, 5.439e+01,
-           5.626e+01, 5.813e+01])
-    
-    See Also
-    --------
-    madmom.features.downbeats.RNNDownBeatProcessor
-    madmom.features.downbeats.DBNDownBeatTrackingProcessor
+def get_downbeats(signal, fs):
     """
-    act = madmom.features.downbeats.RNNDownBeatProcessor()(signal)
-    proc = madmom.features.downbeats.DBNDownBeatTrackingProcessor(beats_per_bar=[3, 4], fps=100)
-    processor_output = proc(act)
-    downbeat_times = processor_output[processor_output[:,1]==1,0]
-    return downbeat_times
+    Basic, sloppy downbeat detection: use Librosa-tracked beats, assume 4/4,
+    and use the phase with the best onset strength.
+    """
+    tempo, beat_frames = librosa.beat.beat_track(y=signal, sr=fs, units="frames")
+    onset_strength_frames = librosa.onset.onset_strength(y=signal, sr=fs)
+    phase_strengths = [np.median(onset_strength_frames[beat_frames[i::4]]) for i in range(4)]
+    best_phase = np.argmax(phase_strengths)
+    return librosa.frames_to_time(beat_frames[best_phase::4], sr=fs)
 
 def make_spectral_cube(signal_mono, downbeat_frames):
     """Convert audio signal into a spectral cube using
@@ -142,7 +119,8 @@ def make_spectral_cube(signal_mono, downbeat_frames):
     """
     assert len(signal_mono.shape) == 1
     # For each span of audio, compute the FFT using librosa defaults.
-    fft_per_span = [librosa.core.stft(signal_mono[b1:b2]) for b1,b2 in zip(downbeat_frames[:-1],downbeat_frames[1:])]
+    usable_downbeat_frames = [d for d in downbeat_frames if d <= len(signal_mono)]
+    fft_per_span = [librosa.core.stft(signal_mono[b1:b2]) for b1,b2 in zip(usable_downbeat_frames[:-1],usable_downbeat_frames[1:])]
     # Tensor size 1: the number of frequency bins
     freq_bins = fft_per_span[0].shape[0]
     # Tensor size 2: the length of the STFTs.
@@ -392,6 +370,23 @@ def get_loop_signal(loop_spectrum, original_spectrum):
     signal = librosa.core.istft(masked_spectrum)
     return signal
 
+def write_all_loop_signals(core, factors, spectral_cube,
+    fs=44100, output_savename="extracted_loop"):
+    # Reconstruct each loop:
+    n_loops = core.shape[2]
+    for ith_loop in range(n_loops):
+        # Multiply templates together to get real loop spectrum:
+        loop_spectrum = create_loop_spectrum(factors[0], factors[1], core[:,:,ith_loop])
+        # Choose best bar to reconstruct from (we will use its phase):
+        bar_ind = choose_bar_to_reconstruct(factors[2], ith_loop)
+        # Reconstruct loop signal by masking original spectrum:
+        ith_loop_signal = get_loop_signal(loop_spectrum, spectral_cube[:,:,bar_ind])
+        # Write signal to disk:
+        soundfile.write("{0}_{1}.wav".format(output_savename,ith_loop), ith_loop_signal, fs)
+
 if __name__ == "__main__":
-    # Run algorithm on test song:
-    run_algorithm("example_song.mp3", n_templates=[0,0,0], output_savename="extracted_loop")
+    parser = argparse.ArgumentParser(description="Write this later")
+    parser.add_argument("audio_file", type=str, help="Path to audio file")
+    parser.add_argument("output_path", type=str, help="Prefix path for output files")
+    args = parser.parse_args()
+    run_algorithm(args.audio_file, [0,0,0], args.output_path)
