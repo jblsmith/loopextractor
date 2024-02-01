@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loopextractor"
+version = "0.0.2"
+dependencies = [
+	"tensorly>=0.8.1",
+	"librosa>=0.10.0",
+	"numpy>=1.22.0",
+	"scikit-learn<=1.3.2,>=1.1.0",
+]
+requires-python = ">= 3.8"
+authors = [{name="Jordan B. L. Smith", email="jblsmith@gmail.com"}]
+description = "Extract loops from songs using NTD"
+readme = "README.md"
+license = {file = "LICENSE.md"}
+keywords = ["source separation", "loops", "audio", "music structure analysis"]
+classifiers = [
+	"Development Status :: 3 - Alpha",
+	"Environment :: Console",
+	"Intended Audience :: Science/Research",
+	"License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+	"Operating System :: OS Independent",
+	"Programming Language :: Python",
+	"Topic :: Scientific/Engineering",
+	"Topic :: Multimedia :: Sound/Audio :: Analysis",
+	"Topic :: Multimedia :: Sound/Audio"
+]
+
+[project.urls]
+Homepage = "https://github.com/jblsmith/loopextractor"
