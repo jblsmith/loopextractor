@@ -6,6 +6,17 @@ The script uses non-negative tensor factorization to model a version of the spec
 
 The code was written by Jordan B. L. Smith (@jblsmith) in December 2019.
 
+
+### Installation
+
+The project currently requires Python ≥3.8.
+
+You can download and install the repository from GitHub directly:
+
+```
+pip install git+https://github.com/jblsmith/loopextractor
+```
+
 ### Usage
 
 Calling loopextractor from the command line will run it on the included audio file as an example:

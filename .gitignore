@@ -1,1 +1,4 @@
 loopextractor/__pycache__/*
+loopextractor.egg-info/*
+tests/test_loops/*
+tests/__pycache__/*
