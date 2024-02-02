@@ -1,8 +1,11 @@
+build:
+	python -m build
+
 install:
 	python setup.py install
+	rm -r build
 
-install-dev:
-	python setup.py install
+install-dev: install
 	pip3 install pytest
 
 test:

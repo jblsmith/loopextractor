@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "loopextractor"
-version = "0.0.2"
+version = "0.2.0"
 dependencies = [
 	"tensorly>=0.8.1",
 	"librosa>=0.10.0",
@@ -13,7 +13,7 @@ dependencies = [
 ]
 requires-python = ">= 3.8"
 authors = [{name="Jordan B. L. Smith", email="jblsmith@gmail.com"}]
-description = "Extract loops from songs using NTD"
+description = "Extract repeating loops from songs using Nonnegative Tucker Decomposition-based source separation"
 readme = "README.md"
 license = {file = "LICENSE.md"}
 keywords = ["source separation", "loops", "audio", "music structure analysis"]
