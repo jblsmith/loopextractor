@@ -99,7 +99,7 @@ def make_spectral_cube(signal_mono, downbeat_frames):
 
     Returns
     -------
-    tensor  : np.ndarray [shape=(n1,n2,n3), dtype=complex64]
+    tensor : np.ndarray [shape=(n1,n2,n3), dtype=complex64]
         tensor containing spectrum slices
 
     Examples
@@ -120,7 +120,7 @@ def make_spectral_cube(signal_mono, downbeat_frames):
     assert len(signal_mono.shape) == 1
     # For each span of audio, compute the FFT using librosa defaults.
     usable_downbeat_frames = [d for d in downbeat_frames if d <= len(signal_mono)]
-    fft_per_span = [librosa.core.stft(signal_mono[b1:b2]) for b1,b2 in zip(usable_downbeat_frames[:-1],usable_downbeat_frames[1:])]
+    fft_per_span = [librosa.core.stft(signal_mono[b1:b2]) for b1,b2 in zip(usable_downbeat_frames[:-1], usable_downbeat_frames[1:])]
     # Tensor size 1: the number of frequency bins
     freq_bins = fft_per_span[0].shape[0]
     # Tensor size 2: the length of the STFTs.
@@ -162,7 +162,7 @@ def validate_template_sizes(spectral_cube, n_templates):
     >>> validate_template_sizes(np.zeros((1025, 162, 31)), [100, 50, 20])
     array([100, 50, 20])
     >>> validate_template_sizes(np.zeros((1025, 162, 31)), [0, 0, 0])
-    array([63, 21,  7])
+    array([63, 21, 7])
     >>> validate_template_sizes(np.zeros((1025, 162, 31)), [100, 50, 40])
     array([63, 21, 7])
     
@@ -205,7 +205,7 @@ def purify_core_tensor(core, factors, new_rank, dim_to_reduce=2):
         New list of templates.
         Note: two templates will be the same as before;
             only the template for the compressed dimension
-            will be different.    
+            will be different.
     """
     assert new_rank < core.shape[dim_to_reduce]
     X = tensorly.unfold(core,dim_to_reduce)
@@ -242,7 +242,7 @@ def get_recommended_template_sizes(spectral_cube):
     >>> get_recommended_template_sizes(np.zeros((100,200,300)))
     array([15, 23, 30])
     >>> get_recommended_template_sizes(np.zeros((4,400,40000)))
-    array([  1,  36, 577])
+    array([1, 36, 577])
     """
     max_template_sizes = np.array(spectral_cube.shape) - 1
     min_template_sizes = np.ones_like(max_template_sizes)
@@ -299,7 +299,7 @@ def create_loop_spectrum(sounds, rhythms, core_slice):
 def choose_bar_to_reconstruct(loop_templates, ith_loop):
     """...Choose... bar... to... reconstruct!
     
-    For now, it just choose the bar with the largest activation.
+    For now, it just chooses the bar with the largest activation.
     More information could / should be included, like reducing
     cross-talk, which would mean considering the activations (but
     ideally the relative *loudnesses*) of the other loops.

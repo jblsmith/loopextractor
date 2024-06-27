@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "loopextractor"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
 	"tensorly>=0.8.1",
 	"librosa>=0.10.0",

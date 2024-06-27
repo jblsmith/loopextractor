@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- Added two tests of loopextractor functions
+
 ## 0.2.0
 
 Reorganised project, preparing for pypi release.
