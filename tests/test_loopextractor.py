@@ -1,4 +1,4 @@
-from loopextractor.loopextractor import get_recommended_template_sizes, purify_core_tensor
+from loopextractor.loopextractor import get_recommended_template_sizes, purify_core_tensor, choose_bar_to_reconstruct
 
 import numpy as np
 
@@ -20,5 +20,15 @@ def test_purify_cube():
     bar_0_before = np.dot(core_tensor, factors[2][0, :])
     bar_0_after = np.dot(pure_tensor, pure_factors[2][0, :])
     assert np.all(np.abs(bar_0_before - bar_0_after) < bar_0_before)
+
+
+def test_choose_bar_to_reconstruct():
+    # Three bars, 4 loops
+    loop_map = np.array([[11,10,1,0,12],
+                         [0,3,2,1,1],
+                         [5,0,0,1,2]]).T
+    assert choose_bar_to_reconstruct(loop_map, 0) == 4
+    assert choose_bar_to_reconstruct(loop_map, 1) == 1
+    assert choose_bar_to_reconstruct(loop_map, 2) == 0
 
 # FIXME: Add more tests
