@@ -3,6 +3,7 @@ build:
 
 install:
 	python setup.py install
+	pip install git+https://github.com/CPJKU/madmom
 	rm -r build
 
 install-dev: install
