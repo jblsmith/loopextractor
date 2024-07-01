@@ -9,11 +9,12 @@ The code was written by Jordan B. L. Smith (@jblsmith) in December 2019.
 
 ### Installation
 
-The project currently requires Python ≥3.8.
+The project requires Python ≥3.8. Since version 0.3.0, it requires madmom.
 
-You can download and install the repository from GitHub directly:
+The best way to get both is to download and install from GitHub directly:
 
 ```
+pip install git+https://github.com/CPJKU/madmom
 pip install git+https://github.com/jblsmith/loopextractor
 ```
 

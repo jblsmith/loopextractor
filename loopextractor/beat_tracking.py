@@ -36,7 +36,7 @@ def get_downbeats_with_madmom(signal):
     Examples
     --------
     >>> signal_mono, fs = librosa.load("example_song.mp3", sr=None, mono=True)
-    >>> get_downbeats(signal_mono)
+    >>> get_downbeats_with_madmom(signal_mono)
     array([1.000e-02, 1.890e+00, 3.760e+00, 5.630e+00, 7.510e+00, 9.380e+00,
            1.126e+01, 1.313e+01, 1.501e+01, 1.688e+01, 1.876e+01, 2.064e+01,
            2.251e+01, 2.439e+01, 2.626e+01, 2.814e+01, 3.002e+01, 3.189e+01,

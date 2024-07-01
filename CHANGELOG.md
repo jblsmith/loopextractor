@@ -2,7 +2,7 @@
 
 ## 0.3.0
 
-- Re-added Madmom to requirements
+- Re-added madmom to requirements
 - Beat-tracking scripts in separate beat_tracking.py file, with test
 
 ## 0.2.1
