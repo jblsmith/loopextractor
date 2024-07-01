@@ -2,7 +2,6 @@
     File name: loopextractor.py
     Author: Jordan B. L. Smith
     Date created: 2 December 2019
-    Date last modified: 1 February 2024
     License: GNU Lesser General Public License v3 (LGPLv3)
     Python Version: 3.8
 '''
@@ -16,6 +15,8 @@ import soundfile
 import tensorly
 import tensorly.decomposition as tld
 from sklearn.decomposition import NMF
+
+from loopextractor.beat_tracking import get_downbeats_with_librosa, get_downbeats_with_madmom
 
 def run_algorithm(audio_file, n_templates=[0,0,0], output_savename="extracted_loop"):
     """Complete pipeline of algorithm.
@@ -48,7 +49,7 @@ def run_algorithm(audio_file, n_templates=[0,0,0], output_savename="extracted_lo
     # Load mono audio:
     signal_mono, fs = librosa.load(audio_file, sr=None, mono=True)
     # Use madmom to estimate the downbeat times:
-    downbeat_times = get_downbeats(signal_mono, fs)
+    downbeat_times = get_downbeats_with_madmom(signal_mono)
     # Convert times to frames so we segment signal:
     downbeat_frames = librosa.time_to_samples(downbeat_times, sr=fs)
     # Create spectral cube out of signal:
@@ -67,17 +68,6 @@ def run_algorithm(audio_file, n_templates=[0,0,0], output_savename="extracted_lo
         ith_loop_signal = get_loop_signal(loop_spectrum, spectral_cube[:,:,bar_ind])
         # Write signal to disk:
         soundfile.write("{0}_{1}.wav".format(output_savename,ith_loop), ith_loop_signal, fs)
-
-def get_downbeats(signal, fs):
-    """
-    Basic, sloppy downbeat detection: use Librosa-tracked beats, assume 4/4,
-    and use the phase with the best onset strength.
-    """
-    tempo, beat_frames = librosa.beat.beat_track(y=signal, sr=fs, units="frames")
-    onset_strength_frames = librosa.onset.onset_strength(y=signal, sr=fs)
-    phase_strengths = [np.median(onset_strength_frames[beat_frames[i::4]]) for i in range(4)]
-    best_phase = np.argmax(phase_strengths)
-    return librosa.frames_to_time(beat_frames[best_phase::4], sr=fs)
 
 def make_spectral_cube(signal_mono, downbeat_frames):
     """Convert audio signal into a spectral cube using

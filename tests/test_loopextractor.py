@@ -1,4 +1,6 @@
-from loopextractor.loopextractor import get_recommended_template_sizes, purify_core_tensor, choose_bar_to_reconstruct
+from loopextractor.loopextractor import (get_recommended_template_sizes,
+                                         purify_core_tensor,
+                                         choose_bar_to_reconstruct)
 
 import numpy as np
 
